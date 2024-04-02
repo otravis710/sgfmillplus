@@ -1,4 +1,4 @@
-# sgfmill-plus
+# sgfmillplus
 A collection of functions built on top of the [sgfmill](https://pypi.org/project/sgfmill/)
 library.
 
