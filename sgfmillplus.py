@@ -1,13 +1,13 @@
 from sgfmill import sgf
 
 # Given a file name, create an Sgf_game object and return the root
-def getRoot(filename):
+def get_root(filename):
     with open(filename, "rb") as f:
         game = sgf.Sgf_game.from_bytes(f.read())
         return game.get_root()
 
 # Given the root, return the string name of the game
-def whichGame(root):
+def which_game(root):
     games_dict = {
         1: "Go",
         2: "Othello",
@@ -50,33 +50,78 @@ def whichGame(root):
         39: "Gipf",
         40: "Kropki"
     }
-    return games_dict[root.get("GM")]
-
-# Given the root, return True if the game is Go
-def isGo(root):
     try:
         game_key = root.get("GM")
     except:
-        return False
+        raise Exception("Root has no GM key.")
+    return games_dict[game_key]
+
+# Given the root, return True if the game is Go
+def is_go(root):
+    try:
+        game_key = root.get("GM")
+    except:
+        raise Exception("Root has no GM key.")
     return game_key == 1
 
 # Given the root, return True if there is more than one move
-def hasMultipleMoves(root):
-    if len(root) == 0:
-        # No moves were made
-        return False
-    if len(root[0]) == 0:
-        # Only one move was made
-        return False
-    return True
+def has_multiple_moves(root):
+    return len(root) != 0 and len(root[0]) != 0
 
-def main():
-    # Testing
-    filename = "./test-sgfs/byoyomi-HA4PO.sgf"
-    root = getRoot(filename)
-    print(whichGame(root))
-    print(isGo(root))
-    print(hasMultipleMoves(root))
+# Given the root, return a dictionary of player names
+def get_player_names(root):
+    res = {
+        "b": None,
+        "w": None
+    }
+    if root.has_property("PB"):
+        res["b"] = root.get("PB")
+    if root.has_property("PW"):
+        res["w"] = root.get("PW")
+    return res
 
-if __name__ == "__main__":
-    main()
+# Given the root, return a dictionary of player ranks
+def get_player_ranks(root):
+    res = {
+        "b": None,
+        "w": None
+    }
+    if root.has_property("BR"):
+        res["b"] = root.get("BR")
+    if root.has_property("WR"):
+        res["w"] = root.get("WR")
+    return res
+
+# Given the root, return the time system
+def get_time_system(root):
+    if root.has_property("TM"):
+        return root.get("TM")
+    return None
+
+# Given the root, return the overtime system
+def get_overtime_system(root):
+    if root.has_property("OT"):
+        return root.get("OT")
+    return None
+
+# Given the root, return the game result
+def get_game_result(root):
+    if root.has_property("RE"):
+        return root.get("RE")
+    return None
+
+# Given a list of substrings, return whether each player name contains
+# at least one of the substrings (not case-sensitive)
+def playernames_contain_substrings(root, substrings):
+    res = {
+        "b": None,
+        "w": None
+    }
+    if root.has_property("PB"):
+        pb = root.get("PB").lower()
+        res["b"] = any((s in pb) for s in substrings)
+    if root.has_property("PW"):
+        pw = root.get("PW").lower()
+        res["w"] = any((s in pw) for s in substrings)
+
+    return res
